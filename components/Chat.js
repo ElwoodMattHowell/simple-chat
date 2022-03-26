@@ -11,6 +11,7 @@ export default class Chat extends React.Component {
   }
 
   //set screen title to props.name
+  //sets messages state with system message
   componentDidMount() {
     let name = this.props.route.params.name;
     this.props.navigation.setOptions({ title: name });
@@ -18,7 +19,7 @@ export default class Chat extends React.Component {
       messages: [
         {
           _id: 1,
-          text: "Hello Developer",
+          text: "Hello " + name,
           createdAt: new Date(),
           user: {
             _id: 2,
@@ -36,12 +37,14 @@ export default class Chat extends React.Component {
     });
   }
 
+  //joins sent message to the messages object of GiftedChat so the recipient can see the message in the chat after receiving it
   onSend(messages = []) {
     this.setState((previousState) => ({
       messages: GiftedChat.append(previousState.messages, messages)
     }))
   }
 
+  //sets background color of right text bubble
   renderBubble(props) {
     return (
       <Bubble
@@ -59,6 +62,7 @@ export default class Chat extends React.Component {
     let backgroundColor = this.props.route.params.backgroundColor
     return (
       <View style={{ backgroundColor: backgroundColor, height: '100%' }} >
+        {/*uses GiftedChat to render chat screen*/}
         <GiftedChat
           rendeBubble={this.renderBubble.bind(this)}
           messages={this.state.messages}
@@ -67,6 +71,7 @@ export default class Chat extends React.Component {
             _id: 1
           }}
         />
+        {/*assures keyboard is visible when entering text into input field on Android*/}
         {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null}
       </View>
     )

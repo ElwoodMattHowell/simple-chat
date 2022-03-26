@@ -11,6 +11,7 @@ export default class Start extends React.Component {
     };
   }
 
+  //sets background color based on user choice
   setBackgroundColor(color) {
     this.setState({ backgroundColor: color })
   }
@@ -38,6 +39,7 @@ export default class Start extends React.Component {
             </View>
             <View style={styles.colorSelection}>
               <Text style={styles.colorSelectionText}>Choose Background Color:</Text>
+              {/*TouchableOpacity creates buttons for the user to press to select background color*/}
               <View style={styles.colorChart}>
                 <TouchableOpacity
                   style={this.state.backgroundColor === "#090C08" ? styles.color1Selected : styles.color1}
@@ -110,10 +112,11 @@ const styles = StyleSheet.create({
   },
   chatButton: {
     width: '100%',
-    height: '80%',
+    height: '65%',
     backgroundColor: '#757083',
     justifyContent: 'center',
-    marginBottom: 10
+    marginBottom: 15,
+    marginTop: 15
   },
   buttonText: {
     color: '#FFFFFF',
@@ -138,7 +141,7 @@ const styles = StyleSheet.create({
   },
   colorChart: {
     flexDirection: 'row',
-    flex: 1
+    flex: 1,
   },
   titleContainer: {
     flex: .56
