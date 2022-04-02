@@ -1,13 +1,40 @@
 import React from 'react';
 import { View, Platform, KeyboardAvoidingView } from 'react-native';
-import { Bubble, GiftedChat } from 'react-native-gifted-chat'
+import { Bubble, GiftedChat } from 'react-native-gifted-chat';
+
+import * as firebase from 'firebase';
+import "firebase/firestore";
+
+// import { initializeApp } from "firebase/app";
+// import { getAnalytics } from "firebase/analytics";
 
 export default class Chat extends React.Component {
   constructor() {
     super();
     this.state = {
-      messages: []
+      messages: [],
+      uid: 0,
+      user: {
+        _id: "",
+        name: "",
+        avatar: ""
+      }
     };
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBm-P-jxAPpQQkDJraLDZWF2EK5offuQ1g",
+      authDomain: "chat-4c9b2.firebaseapp.com",
+      projectId: "chat-4c9b2",
+      storageBucket: "chat-4c9b2.appspot.com",
+      messagingSenderId: "1044459548557",
+      appId: "1:1044459548557:web:0ed248f1479590f75e97c4",
+      measurementId: "G-1TQ1KMJ9SN"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    this.referenceChatMessages = firebase.firestore().collection("messages");
   }
 
   //set screen title to props.name
@@ -15,33 +42,69 @@ export default class Chat extends React.Component {
   componentDidMount() {
     let name = this.props.route.params.name;
     this.props.navigation.setOptions({ title: name });
-    this.setState({
-      messages: [
-        {
-          _id: 1,
-          text: "Hello " + name,
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: "React Native",
-            avatar: "https://placeimg.com/140/140/any"
-          }
-        },
-        {
-          _id: 2,
-          text: "You have entered a chat",
-          createdAt: new Date(),
-          system: true
+    this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+      if (!user) {
+        this.setState({
+          loggedInText: "Please wait, You're being authenticated"
+        })
+        await firebase.auth().signInAnonymously()
+      }
+      this.setState({
+        uid: user.uid,
+        loggedInText: 'Hello there',
+        messages: [],
+        user: {
+          _id: user.uid,
+          name: name,
+          avatar: "https://placeimg.com/140/140/any"
         }
-      ]
+      });
+      this.unsubscribe = this.referenceChatMessages.orderBy("createdAt", "desc").onSnapshot(this.onCollectionUpdate);
     });
   }
 
+  componentWillUnMount() {
+    this.unsunscribe();
+    this.authUnsubscribe();
+  }
+
+  onCollectionUpdate = (querySnapshot) => {
+    const messages = [];
+    // go through each document
+    querySnapshot.forEach((doc) => {
+      // get the QueryDocumentSnapshot's data
+      let data = doc.data();
+      messages.push({
+        _id: data._id,
+        text: data.text,
+        createdAt: data.createdAt.toDate(),
+        user: {
+          _id: data.user._id,
+          name: data.user.name,
+          avatar: data.user.avatar
+        }
+      });
+    });
+    this.setState({
+      messages: messages
+    });
+  }
+  addMessage() {
+    const message = this.state.messages[0];
+    this.referenceChatMessages.add({
+      _id: message._id,
+      text: message.text || "",
+      createdAt: message.createdAt,
+      user: this.state.user
+    })
+  }
   //joins sent message to the messages object of GiftedChat so the recipient can see the message in the chat after receiving it
   onSend(messages = []) {
     this.setState((previousState) => ({
       messages: GiftedChat.append(previousState.messages, messages)
-    }))
+    }), () => {
+      this.addMessage();
+    })
   }
 
   //sets background color of right text bubble
@@ -68,7 +131,9 @@ export default class Chat extends React.Component {
           messages={this.state.messages}
           onSend={(messages) => this.onSend(messages)}
           user={{
-            _id: 1
+            _id: this.state.user._id,
+            name: this.state.name,
+            avatar: this.state.user.avatar
           }}
         />
         {/*assures keyboard is visible when entering text into input field on Android*/}
