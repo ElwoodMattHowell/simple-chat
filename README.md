@@ -1,4 +1,4 @@
-# React-Native-App
+# Simple-Chat
 
 ## Overview
 This React-Native-App is a simple chat app for mobile devices created with React Native. 
