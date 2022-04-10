@@ -44,16 +44,32 @@ export default class Start extends React.Component {
               {/*TouchableOpacity creates buttons for the user to press to select background color*/}
               <View style={styles.colorChart}>
                 <TouchableOpacity
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel="color 1"
+                  accessibilityHint="Changes background color to color 1 on the chat screen."
                   style={this.state.backgroundColor === "#090C08" ? styles.color1Selected : styles.color1}
                   onPress={() => this.setBackgroundColor("#090C08")}>
                 </TouchableOpacity>
                 <TouchableOpacity
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel="color 2"
+                  accessibilityHint="Changes background color to color 2 on the chat screen."
                   style={this.state.backgroundColor === "#474056" ? styles.color2Selected : styles.color2}
                   onPress={() => this.setBackgroundColor('#474056')}></TouchableOpacity>
                 <TouchableOpacity
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel="color 3"
+                  accessibilityHint="Changes background color to color 3 on the chat screen."
                   style={this.state.backgroundColor === "#8A95A5" ? styles.color3Selected : styles.color3}
                   onPress={() => this.setBackgroundColor('#8A95A5')}></TouchableOpacity>
                 <TouchableOpacity
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel="color 4"
+                  accessibilityHint="Changes background color to color 4 on the chat screen."
                   style={this.state.backgroundColor === "#B9C6AE" ? styles.color4Selected : styles.color4}
                   onPress={() => this.setBackgroundColor('#B9C6AE')}></TouchableOpacity>
               </View>

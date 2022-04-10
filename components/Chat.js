@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import CustomActions from './CustomActions.js';
 
+//Configure Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBm-P-jxAPpQQkDJraLDZWF2EK5offuQ1g",
   authDomain: "chat-4c9b2.firebaseapp.com",
@@ -18,6 +19,8 @@ const firebaseConfig = {
   appId: "1:1044459548557:web:0ed248f1479590f75e97c4",
   measurementId: "G-1TQ1KMJ9SN"
 };
+
+LogBox.ignoreAllLogs();
 
 export default class Chat extends React.Component {
   constructor() {
@@ -35,16 +38,15 @@ export default class Chat extends React.Component {
       ocation: null
     };
 
+    //initialize firebase
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
     this.referenceChatMessages = firebase.firestore().collection("messages");
 
-    LogBox.ignoreLogs([
-      "Setting a timer", "Warning: ...", "undefined", "Animated.event now requires a second argument for options"
-    ]);
   }
 
+  //get messages from async storage
   async getMessages() {
     let messages = '';
     try {
@@ -57,6 +59,8 @@ export default class Chat extends React.Component {
     }
   }
 
+
+  //save messages to async storage
   async saveMessages() {
     try {
       await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
@@ -65,6 +69,7 @@ export default class Chat extends React.Component {
     }
   }
 
+  //delete messages from async storage
   async deleteMessages() {
     try {
       await AsyncStorage.removeItem('messages');
@@ -76,20 +81,25 @@ export default class Chat extends React.Component {
     }
   }
 
-  //set screen title to props.name
-  //sets messages state with system message
+
+
   componentDidMount() {
+    //set screen title to props.name
     let name = this.props.route.params.name;
+    //sets messages state with system message
     this.props.navigation.setOptions({ title: name });
+    //check for online staus
     NetInfo.fetch().then(connection => {
       if (connection.isConnected) {
         this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+          // if no user is signed in, create new user
           if (!user) {
             this.setState({
               loggedInText: "Please wait, You're being authenticated"
             })
             await firebase.auth().signInAnonymously()
           }
+          //update user
           this.setState({
             isConnected: true,
             uid: user.uid,
@@ -101,8 +111,10 @@ export default class Chat extends React.Component {
               avatar: "https://placeimg.com/140/140/any"
             }
           });
+          //checks for updates in the collection
           this.unsubscribe = this.referenceChatMessages.orderBy("createdAt", "desc").onSnapshot(this.onCollectionUpdate);
         });
+        this.saveMessages();
       } else {
         this.getMessages();
         this.setState({
@@ -113,10 +125,13 @@ export default class Chat extends React.Component {
   }
 
   componentWillUnMount() {
+    //stop listening for changes
     this.unsunscribe();
+    //stop listening to authentication
     this.authUnsubscribe();
   }
 
+  // takes snapshot of messages stored in collection
   onCollectionUpdate = (querySnapshot) => {
     const messages = [];
     // go through each document
@@ -142,6 +157,7 @@ export default class Chat extends React.Component {
     this.saveMessages();
   }
 
+  //add a new message to the collection
   addMessage() {
     const message = this.state.messages[0];
     this.referenceChatMessages.add({

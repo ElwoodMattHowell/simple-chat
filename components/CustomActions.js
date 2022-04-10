@@ -9,8 +9,9 @@ import 'firebase/firestore';
 
 export default class CustomActions extends Component {
 
-
+  //allows user to pick an image from their image library
   pickImage = async () => {
+    //asks user's permission to access library
     const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
 
     if (status === 'granted') {
@@ -25,7 +26,9 @@ export default class CustomActions extends Component {
     }
   }
 
+  //takes a photo with user's camera
   takePhoto = async () => {
+    //asks permission to use camera
     const { status } = await Permissions.askAsync(
       Permissions.CAMERA,
       Permissions.CAMERA_ROLL
@@ -46,6 +49,7 @@ export default class CustomActions extends Component {
     }
   }
 
+  //uploads image to firebas as a blob
   uploadImage = async (uri) => {
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -73,6 +77,7 @@ export default class CustomActions extends Component {
     return await snapshot.ref.getDownloadURL();
   };
 
+  //requests access to location and returns coordinates
   getLocation = async () => {
     const { status } = await Permissions.askAsync(Permissions.LOCATION);
 
@@ -96,6 +101,7 @@ export default class CustomActions extends Component {
     }
   }
 
+  //when onActionPress is called, an ActionSheet that displays a set of defined actions is created
   onActionPress = () => {
     const options = [
       "Choose photo from library", "Take a picture", "Get your location", "Cancel"
